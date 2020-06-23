@@ -1,6 +1,6 @@
 package com.increff.employee;
 
-import java.io.IOException;  
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.List;
@@ -10,6 +10,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 
 
 @WebServlet(name = "Api Servlet", description = "api servlet", urlPatterns = { "/api" })
@@ -26,18 +27,17 @@ public class ApiServlet extends HttpServlet {
 	@Override
 	// Retrieving
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		resp.setContentType("text/html");
+		resp.setContentType("application/json");
 		PrintWriter out = resp.getWriter();
 
 		String actionParam = req.getParameter("action");
 		String idParam = req.getParameter("id");
-
+		
 		if (idParam == null) {
 			try {
 				List<EmployeePojo> list = api.selectAll();
-				for (EmployeePojo p : list) {
-					print(out, p);
-				}
+				String json = JsonUtil.writeJson(list);
+				out.write(json);
 			} catch (SQLException e) {
 				throw new ServletException("Error retrieving emmployee list", e);
 			}
@@ -52,7 +52,8 @@ public class ApiServlet extends HttpServlet {
 		int id = Integer.valueOf(idParam);
 		try {
 			EmployeePojo p = api.select(id);
-			print(out, p);
+			String json = JsonUtil.writeJson(p);
+			out.write(json);
 		} catch (SQLException e) {
 			throw new ServletException("Error retrieving single employee", e);
 		}
@@ -62,40 +63,27 @@ public class ApiServlet extends HttpServlet {
 	// Creating
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		String name = req.getParameter("name");
-		String id = req.getParameter("id");
-		String age = req.getParameter("age");
-
-		EmployeePojo p = new EmployeePojo();
-		p.setAge(Integer.valueOf(age));
-		p.setId(Integer.valueOf(id));
-		p.setName(name);
-
+		EmployeePojo p = JsonUtil.readJson(req);
 		try {
 			api.insert(p);
 		} catch (SQLException e) {
 			throw new ServletException("Error saving object", e);
 		}
 
-		PrintWriter out = resp.getWriter();
-		out.println("Employee created successfully");
+	
 
 	}
 
 	// Updating
 	@Override
 	protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		String name = req.getParameter("name");
-		String id = req.getParameter("id");
-		String age = req.getParameter("age");
-
-		EmployeePojo p = new EmployeePojo();
-		p.setAge(Integer.valueOf(age));
-		p.setId(Integer.valueOf(id));
-		p.setName(name);
+		
+		String idStr = req.getParameter("id");
+		EmployeePojo p = JsonUtil.readJson(req);
+		int id = Integer.valueOf(idStr);
 
 		try {
-			api.update(p.getId(), p);
+			api.update(id, p);
 		} catch (SQLException e) {
 			throw new ServletException("Error updating object", e);
 		}
@@ -106,8 +94,7 @@ public class ApiServlet extends HttpServlet {
 	@Override
 	protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
-		PrintWriter out = resp.getWriter();
-		out.println("employee deleted");
+	
 		int id = Integer.valueOf(req.getParameter("id"));
 		try {
 			api.delete(id);
@@ -117,12 +104,6 @@ public class ApiServlet extends HttpServlet {
 
 	}
 
-	private void print(PrintWriter out, EmployeePojo p) {
-		out.println("<p>");
-		out.println("Name: " + p.getName());
-		out.println("<br>");
-		out.println("Age: " + p.getAge());
-		out.println("<br>");
-		out.println("Id: " + p.getId());
-	}
+	
+
 }
