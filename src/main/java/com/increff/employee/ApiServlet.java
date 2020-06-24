@@ -11,8 +11,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-
-
 @WebServlet(name = "Api Servlet", description = "api servlet", urlPatterns = { "/api" })
 public class ApiServlet extends HttpServlet {
 
@@ -32,7 +30,7 @@ public class ApiServlet extends HttpServlet {
 
 		String actionParam = req.getParameter("action");
 		String idParam = req.getParameter("id");
-		
+
 		if (idParam == null) {
 			try {
 				List<EmployeePojo> list = api.selectAll();
@@ -70,14 +68,12 @@ public class ApiServlet extends HttpServlet {
 			throw new ServletException("Error saving object", e);
 		}
 
-	
-
 	}
 
 	// Updating
 	@Override
 	protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		
+
 		String idStr = req.getParameter("id");
 		EmployeePojo p = JsonUtil.readJson(req);
 		int id = Integer.valueOf(idStr);
@@ -94,7 +90,6 @@ public class ApiServlet extends HttpServlet {
 	@Override
 	protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
-	
 		int id = Integer.valueOf(req.getParameter("id"));
 		try {
 			api.delete(id);
@@ -103,7 +98,5 @@ public class ApiServlet extends HttpServlet {
 		}
 
 	}
-
-	
 
 }
